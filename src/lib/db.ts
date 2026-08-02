@@ -1,6 +1,6 @@
+import Database from "better-sqlite3";
 import fs from "node:fs/promises";
 import path from "node:path";
-import sqlite3 from "sqlite3";
 
 // const CHINOOK_URL =
 //     "https://storage.googleapis.com/benchmarks-artifacts/chinook/Chinook.db";
@@ -32,14 +32,13 @@ export async function resolveDbPath() {
 
 export async function runQuery(query: string): Promise<Record<string, unknown>[]> {
     const dbPath = await resolveDbPath();
-    const db = new sqlite3.Database(dbPath);
-    return new Promise((resolve, reject) => {
-        db.all(query, [], (err, rows) => {
-            db.close();
-            if (err) reject(err);
-            else resolve(rows as Record<string, unknown>[]);
-        });
-    });
+    const db = new Database(dbPath, { readonly: true });
+    try {
+        const rows = db.prepare(query).all();
+        return rows as Record<string, unknown>[];
+    } finally {
+        db.close();
+    }
 }
 
 export async function getSchema() {
@@ -86,22 +85,47 @@ export function sanitizeSqlQuery(q: string, role: 'admin' | 'customer') {
     return query;
 }
 
-export async function executeWithRole(query: string, role: 'admin' | 'customer' = 'customer') {
-    const dbPath = await resolveDbPath();
-    const db = new sqlite3.Database(dbPath);
+// export async function executeWithRole(query: string, role: 'admin' | 'customer' = 'customer') {
+//     const dbPath = await resolveDbPath();
+//     const db = new Database(dbPath);
 
-    return new Promise((resolve, reject) => {
+//     return new Promise((resolve, reject) => {
+//         const isWrite = /\b(INSERT|UPDATE|DELETE|REPLACE)\b/i.test(query);
+
+//         if (isWrite && role !== 'admin') {
+//             db.close();
+//             return reject(new Error("Unauthorized: Admin role required for write operations."));
+//         }
+
+//         db.all(query, [], (err, rows) => {
+//             db.close();
+//             if (err) reject(err);
+//             else resolve(rows as Record<string, unknown>[]);
+//         });
+//     });
+// }
+export async function executeWithRole(
+    query: string,
+    role: "admin" | "customer" = "customer",
+): Promise<Record<string, unknown>[] | { changes: number; lastInsertRowid: number | bigint }> {
+    const dbPath = await resolveDbPath();
+    const db = new Database(dbPath);
+
+    try {
         const isWrite = /\b(INSERT|UPDATE|DELETE|REPLACE)\b/i.test(query);
 
-        if (isWrite && role !== 'admin') {
-            db.close();
-            return reject(new Error("Unauthorized: Admin role required for write operations."));
+        if (isWrite && role !== "admin") {
+            throw new Error("Unauthorized: Admin role required for write operations.");
         }
 
-        db.all(query, [], (err, rows) => {
-            db.close();
-            if (err) reject(err);
-            else resolve(rows as Record<string, unknown>[]);
-        });
-    });
+        if (isWrite) {
+            const info = db.prepare(query).run();
+            return { changes: info.changes, lastInsertRowid: info.lastInsertRowid };
+        }
+
+        const rows = db.prepare(query).all();
+        return rows as Record<string, unknown>[];
+    } finally {
+        db.close();
+    }
 }

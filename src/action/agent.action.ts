@@ -1,12 +1,12 @@
 import { ChatGroq } from "@langchain/groq";
 import { ChatOllama } from "@langchain/ollama";
+import Database from "better-sqlite3";
 import { SystemMessage, createAgent, tool } from "langchain";
 import fs from "node:fs/promises";
 import path from "node:path";
-import sqlite3 from "sqlite3";
 import * as z from "zod";
 
-const localPath = path.resolve("/src/db/Ecommerce.db");
+const localPath = path.resolve(process.cwd(), "src/db/Ecommerce.db");
 
 export async function resolveDbPath() {
     try {
@@ -20,16 +20,25 @@ export async function resolveDbPath() {
 }
 
 // Below are minimal tools for demonstration purposes.
+// export async function runQuery(query: string): Promise<Record<string, unknown>[]> {
+//     const dbPath = await resolveDbPath();
+//     const db = new sqlite3.Database(dbPath);
+//     return new Promise((resolve, reject) => {
+//         db.all(query, [], (err, rows) => {
+//             db.close();
+//             if (err) reject(err);
+//             else resolve(rows as Record<string, unknown>[]);
+//         });
+//     });
+// }
 export async function runQuery(query: string): Promise<Record<string, unknown>[]> {
     const dbPath = await resolveDbPath();
-    const db = new sqlite3.Database(dbPath);
-    return new Promise((resolve, reject) => {
-        db.all(query, [], (err, rows) => {
-            db.close();
-            if (err) reject(err);
-            else resolve(rows as Record<string, unknown>[]);
-        });
-    });
+    const db = new Database(dbPath, { readonly: true });
+    try {
+        return db.prepare(query).all() as Record<string, unknown>[];
+    } finally {
+        db.close();
+    }
 }
 
 async function getSchema() {
