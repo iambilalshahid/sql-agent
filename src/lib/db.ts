@@ -32,7 +32,7 @@ export async function resolveDbPath() {
 
 export async function runQuery(query: string): Promise<Record<string, unknown>[]> {
     const dbPath = await resolveDbPath();
-    const db = new Database(dbPath, { readonly: true });
+    const db = new Database(dbPath, { readonly: true, fileMustExist: true });
     try {
         const rows = db.prepare(query).all();
         return rows as Record<string, unknown>[];

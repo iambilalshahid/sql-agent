@@ -1,10 +1,8 @@
+import { localPath } from "@/action/agent.action";
 import Database from "better-sqlite3";
 import crypto from "crypto";
-import path from "path";
 
-const dbPath = path.resolve(process.cwd(), "./src/db/Ecommerce.db");
-
-const db = new Database(dbPath);
+const db = new Database(localPath);
 
 console.log("Seeding database...");
 

@@ -1,14 +1,13 @@
+import { localPath } from '@/action/agent.action';
 import { createSession } from '@/lib/auth';
 import Database from 'better-sqlite3';
 import crypto from 'crypto';
 import { NextRequest } from 'next/server';
-import path from "node:path";
 
 export async function POST(req: NextRequest) {
     const { email, password } = await req.json();
 
-    const dbPath = path.resolve(process.cwd(), "src/db/Ecommerce.db");
-    const db = new Database(dbPath, { readonly: true });
+    const db = new Database(localPath, { readonly: true, fileMustExist: true });
 
     let user: any;
     try {
