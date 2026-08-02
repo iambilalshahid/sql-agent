@@ -6,7 +6,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import * as z from "zod";
 
-export const localPath = path.resolve(process.cwd(), ".src/db/Ecommerce.db");
+export const localPath = path.resolve(process.cwd(), "src/db/Ecommerce.db");
 
 export async function resolveDbPath() {
     try {
@@ -33,7 +33,7 @@ export async function resolveDbPath() {
 // }
 export async function runQuery(query: string): Promise<Record<string, unknown>[]> {
     const dbPath = await resolveDbPath();
-    const db = new Database(dbPath, { readonly: true,fileMustExist:true });
+    const db = new Database(dbPath, { readonly: true, fileMustExist: true });
     try {
         return db.prepare(query).all() as Record<string, unknown>[];
     } finally {
