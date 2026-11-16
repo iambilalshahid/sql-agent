@@ -116,7 +116,7 @@ Rules:
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL ?? "gemma4:cloud";
 
 const llm = process.env.USE_GROQ === "true"
-    ? new ChatGroq({ model: process.env.GROQ_MODEL!, apiKey: process.env.GROQ_API_KEY! })
+    ? new ChatGroq({ model: process.env.GROQ_MODEL || "openai/gpt-oss-120b", apiKey: process.env.GROQ_API_KEY! })
     : new ChatOllama({ model: process.env.OLLAMA_MODEL ?? "gemma4:cloud" });
 
 export const agent = createAgent({

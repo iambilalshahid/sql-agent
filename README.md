@@ -99,7 +99,7 @@ cp .env.example .env   # create if missing
 | --- | --- | --- |
 | `USE_GROQ` | `"true"` → Groq, else Ollama | `false` |
 | `GROQ_API_KEY` | Your Groq API key | – |
-| `GROQ_MODEL` | e.g. `llama-3.3-70b-versatile` | – |
+| `GROQ_MODEL` | e.g. `openai/gpt-oss-120b` | `openai/gpt-oss-120b` |
 | `OLLAMA_MODEL` | Ollama model tag | `gemma4:cloud` |
 | `OLLAMA_BASE_URL` | Local Ollama endpoint | `http://localhost:11434` |
 | `JWT_SECRET` | Signing secret for sessions | dev fallback |

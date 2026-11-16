@@ -77,7 +77,7 @@ function getLlm() {
 
     cachedLlm = process.env.USE_GROQ === "true"
         ? new ChatGroq({
-            model: process.env.GROQ_MODEL!,
+            model: process.env.GROQ_MODEL || "openai/gpt-oss-120b",
             apiKey: process.env.GROQ_API_KEY!,
             temperature: 0.1,
         })
